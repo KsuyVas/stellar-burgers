@@ -21,11 +21,11 @@ export const ResetPassword: FC = () => {
       .catch((err) => setError(err));
   };
 
-  useEffect(() => {
-    if (!localStorage.getItem('resetPassword')) {
-      navigate('/forgot-password', { replace: true });
-    }
-  }, [navigate]);
+  //  useEffect(() => {
+  //   if (!localStorage.getItem('resetPassword')) {
+  //      navigate('/forgot-password', { replace: true });
+  //    }
+  //  }, [navigate]);
 
   return (
     <ResetPasswordUI
