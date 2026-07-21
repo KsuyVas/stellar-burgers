@@ -10,10 +10,17 @@ import {
   NotFound404
 } from '@pages';
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { AppHeader, Modal, OrderInfo, IngredientDetails } from '@components';
+import {
+  AppHeader,
+  Modal,
+  OrderInfo,
+  IngredientDetails,
+  ProtectedRoute
+} from '@components';
 import { Preloader } from '@ui';
 import { useDispatch, useSelector } from '../../services/store';
 import { fetchIngredients } from '../../services/slices/ingredientsSlice';
+import { getUser } from '../../services/slices/userSlice';
 import { useEffect } from 'react';
 import styles from './app.module.css';
 
@@ -22,20 +29,30 @@ const App = () => {
   const background = location.state?.background;
   const dispatch = useDispatch();
 
-  const {
-    data: ingredients,
+  const { data: ingredients,
     isLoading,
-    error
-  } = useSelector((state) => state.ingredients);
+    error} =
+    useSelector((state) => state.ingredients);
+
+  const { isAuthChecked } = useSelector((state) => state.user);
 
   useEffect(() => {
     dispatch(fetchIngredients());
   }, [dispatch]);
 
+  useEffect(() => {
+    dispatch(getUser());
+  }, [dispatch]);
+
+  if (!isAuthChecked) {
+    return <Preloader />;
+  }
+
   return (
     <div className={styles.app}>
       <AppHeader />
       <Routes location={background || location}>
+        {/* Главная страница с сохранённой логикой из заготовки */}
         <Route
           path='/'
           element={
@@ -58,16 +75,67 @@ const App = () => {
             )
           }
         />
+
+        {/* Публичные маршруты */}
         <Route path='/feed' element={<Feed />} />
-        <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register />} />
-        <Route path='/forgot-password' element={<ForgotPassword />} />
-        <Route path='/reset-password' element={<ResetPassword />} />
-        <Route path='/profile' element={<Profile />} />
-        <Route path='/profile/orders' element={<ProfileOrders />} />
+
+        {/* Маршруты только для неавторизованных */}
+        <Route
+          path='/login'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <Login />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/register'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <Register />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/forgot-password'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ForgotPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/reset-password'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ResetPassword />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Защищённые маршруты */}
+        <Route
+          path='/profile'
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile/orders'
+          element={
+            <ProtectedRoute>
+              <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* 404 */}
         <Route path='*' element={<NotFound404 />} />
       </Routes>
 
+      {/* Модалки */}
       {background && (
         <Routes>
           <Route
