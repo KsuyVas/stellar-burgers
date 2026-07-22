@@ -14,12 +14,14 @@ import { setCookie, deleteCookie } from '../../utils/cookie';
 type TUserState = {
   user: TUser | null;
   isAuthChecked: boolean;
+  isLoading: boolean;
   error: string | null;
 };
 
 const initialState: TUserState = {
   user: null,
   isAuthChecked: false,
+  isLoading: false,
   error: null
 };
 
@@ -76,48 +78,67 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Регистрация
       .addCase(registerUser.pending, (state) => {
+        state.isLoading = true;
         state.error = null;
       })
       .addCase(registerUser.fulfilled, (state, action) => {
+        state.isLoading = false;
         state.user = action.payload;
         state.isAuthChecked = true;
       })
       .addCase(registerUser.rejected, (state, action) => {
+        state.isLoading = false;
         state.error = action.error.message || 'Ошибка регистрации';
+        state.isAuthChecked = true;
       })
+      // Логин
       .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
+        state.isLoading = false;
         state.user = action.payload;
         state.isAuthChecked = true;
       })
       .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
         state.error = action.error.message || 'Ошибка входа';
+        state.isAuthChecked = true;
       })
+      // Выход
       .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
-        state.isAuthChecked = false;
+        state.isAuthChecked = true;
       })
+      // Получение пользователя
       .addCase(getUser.pending, (state) => {
+        state.isLoading = true;
         state.error = null;
       })
       .addCase(getUser.fulfilled, (state, action) => {
+        state.isLoading = false;
         state.user = action.payload;
         state.isAuthChecked = true;
       })
       .addCase(getUser.rejected, (state, action) => {
+        state.isLoading = false;
         state.error = action.error.message || 'Ошибка загрузки пользователя';
         state.isAuthChecked = true;
       })
+      // Обновление пользователя
       .addCase(updateUser.pending, (state) => {
+        state.isLoading = true;
         state.error = null;
       })
       .addCase(updateUser.fulfilled, (state, action) => {
+        state.isLoading = false;
         state.user = action.payload;
       })
       .addCase(updateUser.rejected, (state, action) => {
+        state.isLoading = false;
         state.error = action.error.message || 'Ошибка обновления данных';
       });
   }

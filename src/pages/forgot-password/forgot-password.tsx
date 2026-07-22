@@ -1,17 +1,20 @@
 import { FC, useState, SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import { forgotPasswordApi } from '@api';
 import { ForgotPasswordUI } from '@ui-pages';
 
 export const ForgotPassword: FC = () => {
   const [email, setEmail] = useState('');
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
+
+    if (!email) {
+      return;
+    }
 
     setError(null);
     forgotPasswordApi({ email })
@@ -19,12 +22,12 @@ export const ForgotPassword: FC = () => {
         localStorage.setItem('resetPassword', 'true');
         navigate('/reset-password', { replace: true });
       })
-      .catch((err) => setError(err));
+      .catch((err) => setError(err.message || 'Ошибка восстановления пароля'));
   };
 
   return (
     <ForgotPasswordUI
-      errorText={error?.message}
+      errorText={error || undefined}
       email={email}
       setEmail={setEmail}
       handleSubmit={handleSubmit}
