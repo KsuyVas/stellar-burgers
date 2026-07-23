@@ -3,8 +3,8 @@ import ingredientsReducer from '../slices/ingredientsSlice';
 import userReducer from '../slices/userSlice';
 import constructorReducer from '../slices/constructorSlice';
 import feedReducer from '../slices/feedSlice';
-import orderReducer from '../slices/orderSlice';
 import profileOrdersReducer from '../slices/profileOrdersSlice';
+import orderReducer from '../slices/orderSlice';
 import orderInfoReducer from '../slices/orderInfoSlice';
 
 export const rootReducer = combineReducers({
@@ -12,7 +12,7 @@ export const rootReducer = combineReducers({
   user: userReducer,
   burgerConstructor: constructorReducer,
   feed: feedReducer,
-  order: orderReducer,
   profileOrders: profileOrdersReducer,
+  order: orderReducer,
   orderInfo: orderInfoReducer
 });

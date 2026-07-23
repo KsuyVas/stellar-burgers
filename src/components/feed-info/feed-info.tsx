@@ -15,12 +15,12 @@ export const FeedInfo: FC = () => {
 
   const readyOrders = getOrders(orders, 'done');
   const pendingOrders = getOrders(orders, 'pending');
-
+  const feed = { total, totalToday };
   return (
     <FeedInfoUI
       readyOrders={readyOrders}
       pendingOrders={pendingOrders}
-      feed={{ total, totalToday }}
+      feed={feed}
     />
   );
 };
