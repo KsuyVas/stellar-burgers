@@ -56,7 +56,6 @@ export const BurgerConstructor: FC = () => {
     }
 
     if (!bun || ingredients.length === 0) {
-      alert('Добавьте булку и начинку!');
       return;
     }
 
@@ -74,7 +73,6 @@ export const BurgerConstructor: FC = () => {
       })
       .catch((err: Error) => {
         console.error('Ошибка оформления заказа:', err);
-        alert('Ошибка оформления заказа');
       });
   };
 

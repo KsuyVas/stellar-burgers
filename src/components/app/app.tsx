@@ -9,7 +9,13 @@ import {
   ProfileOrders,
   NotFound404
 } from '@pages';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+  useMatch
+} from 'react-router-dom';
 import {
   AppHeader,
   ProtectedRoute,
@@ -23,12 +29,17 @@ import { fetchIngredients } from '../../services/slices/ingredientsSlice';
 import { getUser } from '../../services/slices/userSlice';
 import { useEffect } from 'react';
 import styles from './app.module.css';
+import { getCookie } from '../../utils/cookie';
 
 const App = () => {
+  /** TODO: взять переменные из стора */
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const background = location.state?.background;
+
+  const matchFeed = useMatch('/feed/:number');
+  const matchProfileOrders = useMatch('/profile/orders/:number');
 
   const {
     data: ingredients,
@@ -45,7 +56,10 @@ const App = () => {
   }, [dispatch, ingredients.length, isLoading]);
 
   useEffect(() => {
-    dispatch(getUser());
+    const token = getCookie('accessToken');
+    if (token) {
+      dispatch(getUser());
+    }
   }, [dispatch]);
 
   const handleModalClose = () => {
@@ -92,7 +106,14 @@ const App = () => {
         <Route path='/feed' element={<Feed />} />
         <Route path='/ingredients/:id' element={<IngredientDetails />} />
         <Route path='/feed/:number' element={<OrderInfo />} />
-        <Route path='/profile/orders/:number' element={<OrderInfo />} />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <OrderInfo />
+            </ProtectedRoute>
+          }
+        />
 
         <Route
           path='/login'
@@ -134,7 +155,6 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-        {/* 👇 ДОБАВЬ ЭТОТ МАРШРУТ */}
         <Route
           path='/profile/orders'
           element={
@@ -149,25 +169,31 @@ const App = () => {
       {background && (
         <Routes>
           <Route
-            path='/ingredients/:id'
+            path='/feed/:number'
             element={
-              <Modal title='Детали ингредиента' onClose={handleModalClose}>
-                <IngredientDetails />
+              <Modal
+                title={`#${matchFeed?.params.number || 'Заказ'}`}
+                onClose={() => navigate(-1)}
+              >
+                <OrderInfo />
               </Modal>
             }
           />
           <Route
-            path='/feed/:number'
+            path='/ingredients/:id'
             element={
-              <Modal title='Детали заказа' onClose={handleModalClose}>
-                <OrderInfo />
+              <Modal title='Детали ингредиента' onClose={() => navigate(-1)}>
+                <IngredientDetails />
               </Modal>
             }
           />
           <Route
             path='/profile/orders/:number'
             element={
-              <Modal title='Детали заказа' onClose={handleModalClose}>
+              <Modal
+                title={`#${matchProfileOrders?.params.number || 'Заказ'}`}
+                onClose={() => navigate(-1)}
+              >
                 <OrderInfo />
               </Modal>
             }

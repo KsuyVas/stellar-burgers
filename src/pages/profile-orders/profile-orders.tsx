@@ -1,8 +1,8 @@
 import { ProfileOrdersUI } from '@ui-pages';
-import { TOrder } from '@utils-types';
 import { FC, useEffect } from 'react';
 import { useDispatch, useSelector } from '../../services/store';
 import { fetchOrders } from '../../services/slices/profileOrdersSlice';
+import { Preloader } from '@ui';
 
 export const ProfileOrders: FC = () => {
   /** TODO: взять переменную из стора */
@@ -15,7 +15,7 @@ export const ProfileOrders: FC = () => {
   }, [dispatch]);
 
   if (isLoading) {
-    return <div>Загрузка заказов...</div>;
+    return <Preloader />;
   }
 
   return <ProfileOrdersUI orders={orders} />;
