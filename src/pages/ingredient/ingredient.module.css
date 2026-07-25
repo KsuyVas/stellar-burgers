@@ -1,0 +1,42 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 88px);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.title {
+  margin-bottom: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 520px;
+  width: 100%;
+}
+
+.image {
+  width: 100%;
+  max-width: 480px;
+  height: auto;
+}
+
+.nutritionalValues {
+  display: flex;
+  gap: 20px;
+  list-style: none;
+  padding: 0;
+  margin: 20px 0 0;
+}
+
+.nutritionalValue {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #8585ad;
+}

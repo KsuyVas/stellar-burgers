@@ -26,10 +26,11 @@ import {
 import { Preloader } from '@ui';
 import { useDispatch, useSelector } from '../../services/store';
 import { fetchIngredients } from '../../services/slices/ingredientsSlice';
-import { getUser } from '../../services/slices/userSlice';
+import { getUser, setAuthChecked } from '../../services/slices/userSlice';
 import { useEffect } from 'react';
 import styles from './app.module.css';
 import { getCookie } from '../../utils/cookie';
+import { IngredientPage } from '@pages';
 
 const App = () => {
   /** TODO: взять переменные из стора */
@@ -59,6 +60,8 @@ const App = () => {
     const token = getCookie('accessToken');
     if (token) {
       dispatch(getUser());
+    } else {
+      dispatch(setAuthChecked(true));
     }
   }, [dispatch]);
 
@@ -104,8 +107,8 @@ const App = () => {
       <Routes location={background || location}>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='/feed' element={<Feed />} />
-        <Route path='/ingredients/:id' element={<IngredientDetails />} />
         <Route path='/feed/:number' element={<OrderInfo />} />
+        <Route path='/ingredients/:id' element={<IngredientPage />} />
         <Route
           path='/profile/orders/:number'
           element={

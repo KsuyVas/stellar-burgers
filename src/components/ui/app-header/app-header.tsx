@@ -16,42 +16,48 @@ export const AppHeaderUI: FC<TAppHeaderUIProps> = ({ userName }) => {
     <header className={styles.header}>
       <nav className={`${styles.menu} p-4`}>
         <div className={styles.menu_part_left}>
-          <>
-            <BurgerIcon type={'primary'} />
-            <NavLink
-              to='/'
-              style={{ textDecoration: 'none' }}
-              className={({ isActive }) =>
-                `text text_type_main-default ml-2 mr-10 ${
-                  isActive ? 'text_color_primary' : 'text_color_inactive'
-                }`
-              }
-            >
-              Конструктор
-            </NavLink>
-          </>
-          <>
-            <ListIcon type={'primary'} />
-            <NavLink
-              to='/feed'
-              style={{ textDecoration: 'none' }}
-              className={({ isActive }) =>
-                `text text_type_main-default ml-2 ${
-                  isActive ? 'text_color_primary' : 'text_color_inactive'
-                }`
-              }
-            >
-              Лента заказов
-            </NavLink>
-          </>
+          <NavLink
+            to='/'
+            style={{ textDecoration: 'none' }}
+            className={({ isActive }) =>
+              `text text_type_main-default ml-2 mr-10 ${
+                isActive ? 'text_color_primary' : 'text_color_inactive'
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <BurgerIcon type={isActive ? 'primary' : 'secondary'} />
+                <span className='ml-2'>Конструктор</span>
+              </>
+            )}
+          </NavLink>
+
+          <NavLink
+            to='/feed'
+            style={{ textDecoration: 'none' }}
+            className={({ isActive }) =>
+              `text text_type_main-default ml-2 ${
+                isActive ? 'text_color_primary' : 'text_color_inactive'
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <ListIcon type={isActive ? 'primary' : 'secondary'} />
+                <span className='ml-2'>Лента заказов</span>
+              </>
+            )}
+          </NavLink>
         </div>
+
         <div className={styles.logo}>
           <NavLink to='/'>
             <Logo className='' />
           </NavLink>
         </div>
+
         <div className={styles.link_position_last}>
-          <ProfileIcon type={'primary'} />
           <NavLink
             to='/profile'
             style={{ textDecoration: 'none' }}
@@ -63,7 +69,18 @@ export const AppHeaderUI: FC<TAppHeaderUIProps> = ({ userName }) => {
               }`;
             }}
           >
-            {userName || 'Личный кабинет'}
+            {({ isActive }) => {
+              const isProfileActive =
+                isActive || location.pathname.startsWith('/profile');
+              return (
+                <>
+                  <ProfileIcon
+                    type={isProfileActive ? 'primary' : 'secondary'}
+                  />
+                  <span className='ml-2'>{userName || 'Личный кабинет'}</span>
+                </>
+              );
+            }}
           </NavLink>
         </div>
       </nav>
