@@ -183,7 +183,9 @@ const App = () => {
             path='/ingredients/:id'
             element={
               <Modal title='Детали ингредиента' onClose={() => navigate(-1)}>
-                <IngredientDetails />
+                <div style={{ maxWidth: '520px', margin: '0 auto' }}>
+                  <IngredientDetails />
+                </div>
               </Modal>
             }
           />
