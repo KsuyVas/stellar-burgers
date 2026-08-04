@@ -8,7 +8,7 @@ type TOrderState = {
   error: string | null;
 };
 
-const initialState: TOrderState = {
+export const initialState: TOrderState = {
   order: null,
   isLoading: false,
   error: null
@@ -18,7 +18,6 @@ export const createOrder = createAsyncThunk(
   'order/create',
   async (data: string[]) => {
     const response = await orderBurgerApi(data);
-    // Преобразуем ответ API в формат TOrder
     const order: TOrder = {
       _id: response.order._id,
       status: response.order.status,
