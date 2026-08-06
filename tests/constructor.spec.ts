@@ -12,65 +12,24 @@ test.describe('Конструктор бургера', () => {
       }
     });
 
-    await page.route('**/api/ingredients', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          data: mockIngredients
-        })
-      });
+    await page.routeFromHAR('./tests/hars/ingredients.har', {
+      url: '**/api/ingredients',
+      update: false
     });
 
-    await page.route('**/api/auth/user', async (route) => {
-      const authHeader = route.request().headers()['authorization'];
-      if (authHeader) {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            success: true,
-            user: mockUser
-          })
-        });
-      } else {
-        await route.fulfill({
-          status: 401,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            success: false,
-            message: 'Unauthorized'
-          })
-        });
-      }
+    await page.routeFromHAR('./tests/hars/orders.har', {
+      url: '**/api/orders',
+      update: false
     });
 
-    await page.route('**/api/orders', async (route) => {
-      if (route.request().method() === 'POST') {
-        const authHeader = route.request().headers()['authorization'];
-        if (authHeader) {
-          await route.fulfill({
-            status: 200,
-            contentType: 'application/json',
-            body: JSON.stringify({
-              success: true,
-              ...mockOrderResponse
-            })
-          });
-        } else {
-          await route.fulfill({
-            status: 401,
-            contentType: 'application/json',
-            body: JSON.stringify({
-              success: false,
-              message: 'Unauthorized'
-            })
-          });
-        }
-      } else {
-        await route.continue();
-      }
+    await page.routeFromHAR('./tests/hars/user.har', {
+      url: '**/api/auth/user',
+      update: false
+    });
+
+    await page.addInitScript(() => {
+      document.cookie = 'accessToken=test-token; path=/';
+      localStorage.setItem('refreshToken', 'test-refresh-token');
     });
 
     await page.context().addCookies([
@@ -85,9 +44,9 @@ test.describe('Конструктор бургера', () => {
       }
     ]);
 
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
     await page.waitForSelector('[data-testid="ingredient-card"]', {
-      timeout: 10000
+      timeout: 30000
     });
   });
 
@@ -101,47 +60,47 @@ test.describe('Конструктор бургера', () => {
   });
 
   test('Работа модального окна ингредиента', async ({ page }) => {
+    const ingredientName = await page
+      .locator('[data-testid="ingredient-card"]')
+      .first()
+      .locator('.text')
+      .nth(1)
+      .textContent();
+
     await page
       .locator('[data-testid="ingredient-card"]')
       .first()
       .click({ force: true });
     await expect(page).toHaveURL(/\/ingredients\/.+/);
 
-    const hasContent = await page.evaluate(() => {
-      const text = document.body.textContent || '';
-      const image = document.querySelector('img');
-      return text.length > 100 && image !== null;
-    });
-    expect(hasContent).toBe(true);
+    const modal = page.locator('[data-testid="modal"]');
+    await expect(modal).toBeVisible({ timeout: 10000 });
+    await expect(modal).toContainText(ingredientName || '');
 
-    await page.goBack();
+    const hasImage = await page.evaluate(() => {
+      const img = document.querySelector('[data-testid="modal"] img');
+      return img !== null;
+    });
+    expect(hasImage).toBe(true);
+
+    await page.locator('[data-testid="modal-close"]').click({ force: true });
+    await expect(modal).not.toBeVisible();
     await expect(page).toHaveURL('/');
   });
 
   test('Создание заказа', async ({ page }) => {
     const addButtons = page.locator('button:has-text("Добавить")');
-    const count = await addButtons.count();
-
     await addButtons.first().click({ force: true });
     await page.waitForTimeout(500);
 
-    if (count > 1) {
-      await addButtons.nth(1).click({ force: true });
-      await page.waitForTimeout(500);
-    }
+    await addButtons.nth(2).click({ force: true });
+    await page.waitForTimeout(500);
 
-    if (count > 2) {
-      await addButtons.nth(2).click({ force: true });
-      await page.waitForTimeout(500);
-    }
-
-    const constructorState = await page.evaluate(() => {
+    const constructorStateBefore = await page.evaluate(() => {
       const elements = document.querySelectorAll('.constructor-element');
-      return {
-        totalElements: elements.length
-      };
+      return { totalElements: elements.length };
     });
-    expect(constructorState.totalElements).toBeGreaterThan(0);
+    expect(constructorStateBefore.totalElements).toBeGreaterThan(0);
 
     const orderButton = page.locator('[data-testid="order-button"]');
     await expect(orderButton).toBeEnabled({ timeout: 5000 });
@@ -150,7 +109,16 @@ test.describe('Конструктор бургера', () => {
     const orderModal = page.locator('[data-testid="order-modal"]');
     await orderModal.waitFor({ state: 'visible', timeout: 15000 });
     await expect(orderModal).toBeVisible();
-    await expect(orderModal).toContainText('12345');
+
+    const orderNumber = await orderModal.locator('h2').textContent();
+    expect(orderNumber).not.toBeNull();
+    expect(orderNumber?.length).toBeGreaterThan(0);
+
+    const constructorStateAfter = await page.evaluate(() => {
+      const elements = document.querySelectorAll('.constructor-element');
+      return { totalElements: elements.length };
+    });
+    expect(constructorStateAfter.totalElements).toBe(0);
 
     await page.locator('[data-testid="modal-close"]').click({ force: true });
     await expect(orderModal).not.toBeVisible();

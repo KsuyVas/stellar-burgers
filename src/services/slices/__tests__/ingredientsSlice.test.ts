@@ -41,17 +41,17 @@ describe('[ingredientsSlice] тесты редьюсера ингредиент�
           image_mobile: 'bun_mobile.png'
         }
       ];
-      
+
       const action = {
         type: fetchIngredients.fulfilled.type,
         payload: mockData
       };
-      
+
       const state = ingredientsReducer(
         { ...initialState, isLoading: true },
         action
       );
-      
+
       expect(state).toEqual({
         data: mockData,
         isLoading: false,
@@ -66,12 +66,12 @@ describe('[ingredientsSlice] тесты редьюсера ингредиент�
         type: fetchIngredients.rejected.type,
         error: { message: errorMessage }
       };
-      
+
       const state = ingredientsReducer(
         { ...initialState, isLoading: true },
         action
       );
-      
+
       expect(state).toEqual({
         data: [],
         isLoading: false,
@@ -85,12 +85,12 @@ describe('[ingredientsSlice] тесты редьюсера ингредиент�
         type: fetchIngredients.rejected.type,
         error: {}
       };
-      
+
       const state = ingredientsReducer(
         { ...initialState, isLoading: true },
         action
       );
-      
+
       expect(state).toEqual({
         data: [],
         isLoading: false,

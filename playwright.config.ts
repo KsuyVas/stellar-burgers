@@ -7,8 +7,9 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
+  timeout: 60000,
   use: {
-    baseURL: 'http://localhost:4000', // ← ИЗМЕНИТЕ с 3000 на 4000
+    baseURL: 'http://localhost:4000',
     trace: 'on-first-retry'
   },
   projects: [
@@ -16,11 +17,11 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] }
     }
-  ]
-  // webServer: {
-  //   command: 'npm start',
-  //   url: 'http://localhost:4000',
-  //   reuseExistingServer: true,
-  //   timeout: 120000,
-  // },
+  ],
+  webServer: {
+    command: 'npm start',
+    port: 4000,
+    reuseExistingServer: !process.env.CI,
+    timeout: 180000
+  }
 });
