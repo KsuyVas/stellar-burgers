@@ -21,7 +21,7 @@ const constructorSlice = createSlice({
       } else {
         state.ingredients.push(action.payload);
       }
-      console.log('📦 Текущее состояние:', state);
+      //console.log('📦 Текущее состояние:', state);
     },
     removeIngredient: (state, action: PayloadAction<string>) => {
       const index = state.ingredients.findIndex(
