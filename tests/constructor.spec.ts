@@ -1,12 +1,9 @@
 import { test, expect } from '@playwright/test';
-import { mockIngredients, mockUser, mockOrderResponse } from './mockData';
 
 test.describe('Конструктор бургера', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
-      const overlay = document.getElementById(
-        'webpack-dev-server-client-overlay'
-      );
+      const overlay = document.getElementById('webpack-dev-server-client-overlay');
       if (overlay) {
         overlay.style.display = 'none';
       }
@@ -14,17 +11,17 @@ test.describe('Конструктор бургера', () => {
 
     await page.routeFromHAR('./tests/hars/ingredients.har', {
       url: '**/api/ingredients',
-      update: false
+      update: false,
     });
 
     await page.routeFromHAR('./tests/hars/orders.har', {
       url: '**/api/orders',
-      update: false
+      update: false,
     });
 
     await page.routeFromHAR('./tests/hars/user.har', {
       url: '**/api/auth/user',
-      update: false
+      update: false,
     });
 
     await page.addInitScript(() => {
@@ -40,42 +37,32 @@ test.describe('Конструктор бургера', () => {
         path: '/',
         httpOnly: false,
         secure: false,
-        sameSite: 'Lax'
-      }
+        sameSite: 'Lax',
+      },
     ]);
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await page.waitForSelector('[data-testid="ingredient-card"]', {
-      timeout: 30000
-    });
+    await page.waitForSelector('[data-testid="ingredient-card"]', { timeout: 30000 });
   });
 
   test('Добавление ингредиента из списка в конструктор', async ({ page }) => {
-    await page
-      .locator('button:has-text("Добавить")')
-      .first()
-      .click({ force: true });
+    await page.locator('button:has-text("Добавить")').first().click({ force: true });
     const orderButton = page.locator('[data-testid="order-button"]');
     await expect(orderButton).toBeEnabled({ timeout: 5000 });
   });
 
   test('Работа модального окна ингредиента', async ({ page }) => {
-    const ingredientName = await page
-      .locator('[data-testid="ingredient-card"]')
-      .first()
-      .locator('.text')
-      .nth(1)
-      .textContent();
+    const ingredientCard = page
+      .locator('[data-testid="ingredient-card"]:has-text("Краторная булка N-200i")')
+      .first();
 
-    await page
-      .locator('[data-testid="ingredient-card"]')
-      .first()
-      .click({ force: true });
+    await ingredientCard.click({ force: true });
+
     await expect(page).toHaveURL(/\/ingredients\/.+/);
 
     const modal = page.locator('[data-testid="modal"]');
     await expect(modal).toBeVisible({ timeout: 10000 });
-    await expect(modal).toContainText(ingredientName || '');
+    await expect(modal).toContainText('Краторная булка N-200i');
 
     const hasImage = await page.evaluate(() => {
       const img = document.querySelector('[data-testid="modal"] img');
@@ -110,9 +97,7 @@ test.describe('Конструктор бургера', () => {
     await orderModal.waitFor({ state: 'visible', timeout: 15000 });
     await expect(orderModal).toBeVisible();
 
-    const orderNumber = await orderModal.locator('h2').textContent();
-    expect(orderNumber).not.toBeNull();
-    expect(orderNumber?.length).toBeGreaterThan(0);
+    await expect(orderModal.locator('h2')).toHaveText('12345');
 
     const constructorStateAfter = await page.evaluate(() => {
       const elements = document.querySelectorAll('.constructor-element');
